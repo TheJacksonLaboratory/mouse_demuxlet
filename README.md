@@ -31,8 +31,12 @@ ancestry for each cell, and to identify mixed background doublets.
 
 For reproducibility, we have produced singularity containers that contain all of the
 software used throughout this pipeline. You can find links to these
-containers at
-[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://jaxreg.jax.org/collections/51)
+containers here:
+
+ * [demuxlet/popscle](https://cloud.sylabs.io/library/daskelly/mouse_demuxlet/popscle)
+ * [picard](http://jaxreg.jax.org/containers/334)
+ * [R4.3 with tidyverse, qtl2, and other packages](https://cloud.sylabs.io/library/daskelly/mouse_demuxlet/tidyqtl2_r)
+ * [samtools](https://cloud.sylabs.io/library/daskelly/mouse_demuxlet/samtools)
 
 
 ## Overview of process
@@ -53,7 +57,5 @@ containers at
 ## Interpreting output
 
 
-containers -- quay.io --> samtools (bgzip and other things), R tidyqtl2, picard, popscle
-CC founders variants VCF
 example allele probs (genotypes) -- from qtl2???
 
