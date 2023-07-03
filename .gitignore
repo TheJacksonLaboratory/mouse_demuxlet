@@ -50,3 +50,10 @@ rsconnect/
 
 # RStudio project file
 mouse_demuxlet.Rproj
+
+# Large files that must be downloaded locally from URLs provided in repo
+cc_variants.sqlite
+samtools*
+tidyqtl2*
+picard*
+popscle*
