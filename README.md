@@ -1,6 +1,6 @@
-# mouse_demuxlet
+# Single cell genetic demultiplexing in the mouse
 
-Single cell genetic demultiplexing in the mouse. In this repository we show
+In this repository we show
 how to carry out genetic demultiplexing of pooled mouse 
 single cell/nucleus transcriptomics
 data. We use the software `demuxlet `
