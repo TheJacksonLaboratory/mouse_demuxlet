@@ -1,0 +1,152 @@
+---
+title: "Impute SNP variants from genoprobs and produce a full-genome VCF"
+author: "Dan Skelly"
+date: "Last updated `r format(Sys.time(), '%a %b %d %Y, %X %Z')`"
+output:
+  html_document:
+    code_download: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, cache = FALSE)
+
+here::i_am("impute_full_vcf.Rmd", 
+           uuid = "500b5439-4892-4f95-915b-ba150110763e")
+library(here)
+library(tidyverse)
+library(assertthat)
+library(qtl2)
+```
+
+## Loading genoprobs data
+
+Here we download and use some example genoprobs data
+that is available in the `R/qtl2` repository.
+(Thanks to the `qtl2ggplot` 
+[vignette](https://cran.r-project.org/web/packages/qtl2ggplot/vignettes/qtl2ggplot.html) 
+for the idea to use these data).
+These data include allele probs for just the first three mouse
+chromosomes. We will use *only* the first two mice in this object.
+All files in this document are using `mm10` genome coordinates.
+
+```{r load_genoprobs}
+tmpfile <- tempfile()
+file <- paste0("https://raw.githubusercontent.com/rqtl/",
+               "qtl2data/master/DOex/DOex_alleleprobs.rds")
+download.file(file, tmpfile)
+apr <- readRDS(tmpfile)
+unlink(tmpfile)
+
+# Use just the first two mice. 
+# Usually we would NOT be subsetting allele probabilities here
+apr <- subset(apr, ind = c(1, 5))
+
+# make a physical marker map from GigaMuga data:
+gm <- readr::read_csv(here("supporting_files/gm_uwisc_v2.csv.gz"))
+markers <- lapply(apr, function(x) dimnames(x)[3]) %>% unlist() %>% unname()
+new_pmap <- gm %>% filter(marker %in% markers) %>% 
+  select(marker, chr, bp_mm10) %>% mutate(bp = bp_mm10 / 1e6)
+pmap <- split(new_pmap, new_pmap$chr) %>%
+  lapply(., function(x) select(x, marker, bp) %>% deframe)
+```
+
+Set up methods for querying variants in genomic regions:
+```{r}
+query_variants <- create_variant_query_func(
+  here("variants/cc_variants.sqlite"))
+```
+
+A function to get VCF info for one chromosome:
+```{r}
+get_vcf_info <- function(chrom) {
+  # Get SNPs and filter to only biallelic sites
+  vv <- query_variants(chrom, 0, 1e6)
+  vv$n_allele <- sapply(strsplit(vv$alleles,
+    '|', fixed = TRUE), length)
+  vv <- vv[vv$type == 'snp' & vv$n_allele == 2, ]   # remove non-snp, non-biallelic
+  vv$allele1 <- sapply(strsplit(vv$alleles, '|', fixed = TRUE), '[[', 1)
+  vv$allele2 <- sapply(strsplit(vv$alleles, '|', fixed = TRUE), '[[', 2)
+  vv$biallelic <- vv$allele1 %in% c("A", "C", "G", "T") &
+    vv$allele2 %in% c("A", "C", "G", "T")
+  vv <- vv[vv$biallelic, ]
+  vv <- index_snps(pmap, vv)
+  vv$index_snp <- find_index_snp(vv, vv$snp_id)
+  
+  # Convert from genoprobs to snpprobs
+  snps <- genoprob_to_snpprob(apr, vv)
+  
+  # For those SNPs where C57BL/6J is listed as having allele 2 (not allele 1),
+  # need to switch alleles for all strains:
+  vv$REF <- vv$allele1
+  vv$ALT <- vv$allele2
+  switch <- vv$C57BL_6J == 2
+  vv[switch, 'REF'] <- vv[switch, 'allele2']
+  vv[switch, 'ALT'] <- vv[switch, 'allele1']
+  
+  # Get genotypes in form 0/1
+  snp_info <- select(vv, chr, pos, snp_id, REF, ALT)
+  snp_info$chr <- paste0('chr', snp_info$chr)  # add on chr which is required for demux with CellRanger BAMs
+  snp_info$pos <- round(snp_info$pos * 1e6)
+  snp_info$QUAL <- 30
+  snp_info$FILTER <- "PASS"
+  snp_info$INFO <- "."
+  snp_info$FORMAT <- "GT"
+  ind_id <- dimnames(snps[[chrom]])[[1]]
+  n_ind <- length(ind_id)
+  gt <- matrix(nrow = nrow(vv), ncol = n_ind)
+  rownames(gt) <- vv$snp_id
+  colnames(gt) <- ind_id
+  for (i in 1:n_ind) {
+    ind <- ind_id[i]
+    this_gt <- snps[[chrom]][ind, , ] %>% t() %>% `*`(2) %>% round()
+    all_gt <- this_gt[vv$index_snp, ]
+    rownames(all_gt) <- vv$snp_id
+    all_gt[switch, ] <- 2 - all_gt[switch, ]
+    gt_chr <- apply(all_gt, 1, paste, collapse = '')
+    assert_that(all(gt_chr %in% c('02', '20', '11')))
+    gt_chr2 <- c('02'='1/1', '20'='0/0', '11'='0/1')[gt_chr]
+    gt[vv$snp_id, ind] <- gt_chr2
+  }
+  cbind(snp_info, gt)
+}
+```
+
+Store info on the chromosome lengths for VCF header.
+```{r}
+chrom_lens <- c('chr1' = 195471971, 'chr10' = 130694993,
+  'chr11' = 122082543, 'chr12' = 120129022, 'chr13' = 120421639,
+  'chr14' = 124902244, 'chr15' = 104043685, 'chr16' = 98207768,
+  'chr17' = 94987271, 'chr18' = 90702639, 'chr19' = 61431566,
+  'chr2' = 182113224, 'chr3' = 160039680, 'chr4' = 156508116,
+  'chr5' = 151834684, 'chr6' = 149736546, 'chr7' = 145441459,
+  'chr8' = 129401213, 'chr9' = 124595110, 'chrX' = 171031299)
+
+contig_ids <- setNames(paste0('##contig=<ID=', names(chrom_lens),
+  ',length=', chrom_lens, '>'), names(chrom_lens))
+##contig=<ID=chrX,length=171031299>
+```
+
+
+Do this on each full chrom, writing a VCF while we're at it:
+```{r write, message = FALSE, warning = FALSE}
+outfile <- here('impute_full.vcf')
+cat('##fileformat=VCFv4.3\n', file = outfile, append = FALSE)
+cat('##FILTER=<ID=PASS,Description="All filters passed">\n', 
+    '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n',
+    sep = '', file = outfile, append = TRUE)
+
+chroms <- sort(names(apr))
+for (i in 1:length(chroms)) {
+  cat(contig_ids[paste0('chr', chroms[i])], '\n', sep='', 
+                 file = outfile, append = TRUE)
+}
+
+ind_id <- dimnames(apr[[1]])[[1]]
+cat('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t', 
+    paste(ind_id, collapse = '\t'), '\n', file = outfile, append = TRUE)
+
+for (i in 1:length(chroms)) {
+  to_write <- get_vcf_info(chroms[i])
+  write_tsv(to_write, file = outfile, append = TRUE)
+}
+```

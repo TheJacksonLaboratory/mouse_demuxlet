@@ -1,0 +1,21 @@
+@HD	VN:1.6
+@SQ	SN:chr1	LN:195471971	M5:c4ec915e7348d42648eefc1534b71c99	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr10	LN:130694993	M5:7831ecda5dd6bcf838e2452ea0139eac	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr11	LN:122082543	M5:e168c7a3194813f597181f26bb1bd13f	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr12	LN:120129022	M5:671f85bb54a6e097d631e2e2dd813ad4	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr13	LN:120421639	M5:7f9b9fa3fbd9a38634107dfdc7fd8dc8	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr14	LN:124902244	M5:bf4e1efa25a8fd23b41c91f9bcb86388	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr15	LN:104043685	M5:106358dace00e5825ae337c1f1821b5e	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr16	LN:98207768	M5:5482110a6cedd3558272325eee4c5a17	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr17	LN:94987271	M5:0d21e8edbfcd8410523b2b94e6dae892	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr18	LN:90702639	M5:46fda2f7e6dbf91bff91d6703e004afb	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr19	LN:61431566	M5:7d363594531514ce41dfacfd97bc995d	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr2	LN:182113224	M5:fe020a692e23f8468b376e14e304a10f	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr3	LN:160039680	M5:50f9385167e70825931231ddf1181b80	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr4	LN:156508116	M5:e7bdfb3ce7f54d2720b0718ed2ea063c	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr5	LN:151834684	M5:095f3d4ebe1f0bafff057cc9b130186d	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr6	LN:149736546	M5:62628d042ea5e01adff5b481d23def67	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr7	LN:145441459	M5:65da9ab01a76dcbcaef6f32a753585c1	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr8	LN:129401213	M5:dd2d079a37c02e8a3f95abff9e37ac69	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chr9	LN:124595110	M5:ef8a85e56b750c10568656361fac7990	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
+@SQ	SN:chrX	LN:171031299	M5:b3db6d6da78d5268688ee395c2c8cb4a	UR:file:/projects/skelld/10x/refdata-gex-mm10-2020-A/fasta/genome.fa
