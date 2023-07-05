@@ -20,7 +20,9 @@ we focus on the setting where genotypes *are* available.
 For inbred mouse strains you should be able to use genetic variation
 cataloged by the 
 [Mouse Genomes Project](https://www.sanger.ac.uk/data/mouse-genomes-project/) to
-construct a VCF file and use this to run `demuxlet` in an analogous fashion
+construct a VCF file (for example, using 
+[bcftools](https://samtools.github.io/bcftools/bcftools.html) to subset the 
+Mouse Genomes Project VCF) and use this to run `demuxlet` in an analogous fashion
 starting on step 2 below.
 
 In all instances, we use the output of 10X CellRanger, specifically
@@ -48,14 +50,44 @@ containers here:
 
 ## Construct pooled sample VCF
 
+See the document [`impute_full_vcf.Rmd`](https://github.com/TheJacksonLaboratory/mouse_demuxlet/blob/main/impute_full_vcf.Rmd). In this document we show how to take inferred 
+allele probabilities from a set of Diversity Outbred mice, and produce a VCF 
+file that we can use for genetic demultiplexing. 
+
+This file should then be bgzipped. For example:
+```bash
+ singularity exec containers/samtools_1.10.sif /opt/bin/bgzip impute_full.vcf
+```
+
 ## Reorder 10X BAM file to play well with VCF
+
+In this repository we include a toy BAM file that consists of two cells that have
+been extracted from a real 10X RNA-Seq dataset using the utility 
+[`subset-bam`](https://github.com/10XGenomics/subset-bam).
+In a real setting you should use the BAM file produced by 10X CellRanger,
+called `possorted_genome_bam.bam` in current (May 2023) versions of
+CellRanger. 
+
+ * [`reorder_bam.slurm`](https://github.com/TheJacksonLaboratory/mouse_demuxlet/blob/main/reorder_bam.slurm) - `slurm` job submission script for doing this reordering on a cluster. 
+ If you have large (or many) BAM files (typical), you will want to use a cluster. This file 
+ can also be used as a plain `bash` script. 
 
 ## Run `dsc-pileup`
 
+You can read more about running `demuxlet` at
+[this link](https://github.com/statgen/popscle). In short, we first run
+`dsc-pileup` to generate read pileup files, then we run 
+`demuxlet` to deconvolute pooled samples. 
+
+ * [`run_pileup_founders.slurm`](https://github.com/TheJacksonLaboratory/mouse_demuxlet/blob/main/run_pileup_founders.slurm) - `slurm` job submission script for running `dsc-pileup` on 
+ a cluster. If you have large (or many) BAM files (typical), you will want to use a cluster. This file can also be used as a plain `bash` script. 
+
 ## Run `demuxlet`
 
-## Interpreting output
+You can read more about running `demuxlet` at
+[this link](https://github.com/statgen/popscle). In short, we first run
+`dsc-pileup` to generate read pileup files, then we run 
+`demuxlet` to deconvolute pooled samples. 
 
-
-example allele probs (genotypes) -- from qtl2???
-
+ * [`run_demuxlet.slurm`](https://github.com/TheJacksonLaboratory/mouse_demuxlet/blob/main/run_demuxlet.slurm) - `slurm` job submission script for running `demuxlet` on 
+ a cluster. This file can also be used as a plain `bash` script. 
